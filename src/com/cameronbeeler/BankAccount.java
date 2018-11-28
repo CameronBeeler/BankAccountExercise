@@ -14,16 +14,22 @@ class BankAccount
 
     public void deposit(double amount)
     {
-        System.out.println("new deposit amount $" + amount);
-        this.balance += amount;
-        System.out.println("new balance amount $" + this.balance);
+        synchronized (this)
+        {
+            System.out.println("new deposit amount $" + amount);
+            this.balance += amount;
+            System.out.println("new balance amount $" + this.balance);
+        }
     }
 
     public void withdraw(double amount)
     {
-        System.out.println("new withdrawal amount $" + amount);
-        this.balance -= amount;
-        System.out.println("new balance amount $" + this.balance);
+        synchronized (this)
+        {
+            System.out.println("new withdrawal amount $" + amount);
+            this.balance -= amount;
+            System.out.println("new balance amount $" + this.balance);
+        }
     }
 
     public
