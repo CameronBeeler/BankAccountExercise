@@ -18,8 +18,9 @@ class BankAccount
         lock = new ReentrantLock();
     }
 
-    public void deposit(double amount)
+    public boolean deposit(double amount)
     {
+        boolean status = false;
         try{
             if (lock.tryLock(1000, TimeUnit.MILLISECONDS))
             {
@@ -28,6 +29,7 @@ class BankAccount
                     System.out.println("new deposit amount $" + amount);
                     this.balance += amount;
                     System.out.println("new balance amount $" + this.balance);
+                    status = true;
                 }
                 finally
                 {
@@ -43,10 +45,13 @@ class BankAccount
         {
 
         }
+        System.out.println("Transaction status = " + status);
+        return status;
     }
 
-    public void withdraw(double amount)
+    public boolean withdraw(double amount)
     {
+        boolean status = false;
         try{
             if (lock.tryLock(1000, TimeUnit.MILLISECONDS))
             {
@@ -55,6 +60,7 @@ class BankAccount
                     System.out.println("new withdrawal amount $" + amount);
                     this.balance -= amount;
                     System.out.println("new balance amount $" + this.balance);
+                    status = true;
                 }
                 finally
                 {
@@ -71,6 +77,8 @@ class BankAccount
         {
 
         }
+        System.out.println("Transaction status = " + status);
+        return status;
     }
 
     public
@@ -83,5 +91,25 @@ class BankAccount
     String getAccountNumber()
     {
         return this.accountNumber;
+    }
+
+
+    public boolean transfer(BankAccount destinationAccount, double amount) {
+        if (withdraw(amount))
+        {
+            if (destinationAccount.deposit(amount))
+            {
+                return true;
+            }
+            else
+            {
+                // The deposit failed. Refund the money back into the account.
+                System.out.printf("%s: Destination account busy. Refunding money\n",
+                                  Thread.currentThread().getName());
+                deposit(amount);
+            }
+        }
+
+        return false;
     }
 }
